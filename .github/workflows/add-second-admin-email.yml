@@ -1,0 +1,38 @@
+name: Add second admin email
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update-email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add second admin email
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          old = "_cc:'haiderharoon252@gmail.com'"
+          new = "_cc:'haiderharoon252@gmail.com,muhammadmohid2900@gmail.com'"
+          if old not in s:
+              print('Second email already added or target not found; no changes needed.')
+          else:
+              p.write_text(s.replace(old, new, 1))
+          PY
+      - name: Commit change
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No change to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Add second admin email'
+          git push
