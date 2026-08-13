@@ -1,0 +1,31 @@
+name: Update Sanai Lore
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  update-lore:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace election lore
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='<article class="lore-card"><span class="lore-year">7TH CLASS • ELECTION SEASON</span><h3>The Election We Almost Won 🗳️😭</h3><p>Back in 7th class, school elections had everyone busy with campaigns. Admin and his fellow admin went all in, even taking down their opponent\'s posters one morning. 😭 They teamed up with Head Boy <b>Huzaifa</b> and pushed the campaign hard. But after all that effort... they lost by just <b>13 votes</b> to the guy from 7 Blue. 💀</p></article>'
+          new='<article class="lore-card"><span class="lore-year">7TH CLASS • LAST DAY</span><h3>The Six-Phone Incident 📱👀</h3><p>It was the last day of 7th class, and somehow we had <b>six phones</b> with us. Everything was fine until suddenly... <b>checking started.</b> 💀 One Islamiat Mam was nearby — the same Mam who had seemed to keep us on our toes all year. But we knew she wasn\'t actually as scary as she seemed. We quietly told Mam what was going on, and she helped us keep the phones out of sight until the checking was over. 😭 Afterward, Mam even took a few pictures with us and gave the phones back. That day, the whole class learned one thing: <b>sometimes the strict-looking teacher is the one who surprises you the most.</b> 📱😂</p></article>'
+          if old not in s:
+              raise SystemExit('old story not found')
+          p.write_text(s.replace(old,new),encoding='utf-8')
+          PY
+      - name: Commit change
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Replace election lore with six-phone story'
+          git push
